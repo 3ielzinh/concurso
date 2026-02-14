@@ -45,6 +45,15 @@ class UserSearchForm(forms.Form):
 class UserEditForm(forms.ModelForm):
     """Form for editing user information"""
     
+    plan = forms.ModelChoiceField(
+        queryset=Plan.objects.filter(is_active=True).order_by('price'),
+        required=False,
+        empty_label='Nenhum plano selecionado',
+        label='Plano de Assinatura',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        help_text='Selecione um plano para criar/atualizar a assinatura do usuário'
+    )
+    
     class Meta:
         model = User
         fields = [
@@ -74,6 +83,14 @@ class UserEditForm(forms.ModelForm):
                 'step': '0.5'
             }),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Se o usuário já tem assinatura ativa, pré-selecionar o plano
+        if self.instance and self.instance.pk:
+            active_subscription = self.instance.subscriptions.filter(status='active').first()
+            if active_subscription:
+                self.fields['plan'].initial = active_subscription.plan
 
 
 class UserModuleAccessForm(forms.ModelForm):

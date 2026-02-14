@@ -127,7 +127,33 @@ def user_edit(request, user_id):
     if request.method == 'POST':
         form = UserEditForm(request.POST, instance=user)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            
+            # Process plan selection
+            selected_plan = form.cleaned_data.get('plan')
+            if selected_plan:
+                # Cancel any active subscription
+                Subscription.objects.filter(user=user, status='active').update(status='cancelled')
+                
+                # Create new subscription
+                from datetime import timedelta
+                start_date = timezone.now().date()
+                end_date = start_date + timedelta(days=30)  # 30 days subscription
+                
+                Subscription.objects.create(
+                    user=user,
+                    plan=selected_plan,
+                    status='active',
+                    start_date=start_date,
+                    end_date=end_date,
+                    auto_renew=True
+                )
+                
+                # Update user premium status based on plan
+                user.is_premium = selected_plan.has_premium_categories
+                user.subscription_start = start_date
+                user.subscription_end = end_date
+                user.save()
             
             # Log the action
             UserAccessLog.objects.create(
