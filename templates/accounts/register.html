@@ -3,93 +3,277 @@
 
 {% block title %}Criar Conta - MicroSaaS Concursos{% endblock %}
 
+{% block extra_css %}
+<style>
+.auth-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px 30px;
+    text-align: center;
+}
+
+.auth-header i {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.auth-body {
+    padding: 40px 30px;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-auth {
+    border-radius: 10px;
+    padding: 14px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-auth:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+}
+
+.password-strength {
+    height: 5px;
+    border-radius: 3px;
+    background: #e0e0e0;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.password-strength-bar {
+    height: 100%;
+    width: 0;
+    transition: all 0.3s ease;
+}
+
+.strength-weak { background: #ff4444; width: 33%; }
+.strength-medium { background: #ffa500; width: 66%; }
+.strength-strong { background: #00C851; width: 100%; }
+
+.auth-footer {
+    background: #f8f9fa;
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid #e0e0e0;
+}
+
+.benefits-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 5px 15px;
+    border-radius: 20px;
+    margin: 5px;
+    font-size: 14px;
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="col-xl-6 col-lg-7 col-md-9">
-        <div class="card shadow-lg border-0">
-            <div class="card-body p-5">
-                <div class="text-center mb-4">
-                    <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
-                    <h1 class="h3 text-gray-900 mt-3">Crie sua conta grátis</h1>
-                    <p class="text-muted">Comece a organizar seus estudos hoje mesmo</p>
-                </div>
-                
-                <form method="post" class="user">
-                    {% csrf_token %}
+<div class="auth-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-11">
+                <div class="row auth-card">
+                    <!-- Left Side - Branding -->
+                    <div class="col-lg-5 d-none d-lg-block auth-header p-5">
+                        <i class="bi bi-person-plus-fill"></i>
+                        <h2 class="mb-3">Comece Grátis</h2>
+                        <p class="mb-4">Junte-se a milhares de estudantes que já organizam seus estudos conosco</p>
+                        <div class="mt-4">
+                            <div class="benefits-badge">📚 Gratuito para começar</div>
+                            <div class="benefits-badge">⚡ Rápido e fácil</div>
+                            <div class="benefits-badge">🎯 Focado em resultados</div>
+                            <div class="benefits-badge">📊 Métricas detalhadas</div>
+                        </div>
+                    </div>
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.first_name.id_for_label }}" class="form-label">Nome *</label>
-                            {{ form.first_name }}
-                            {% if form.first_name.errors %}
-                                <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
-                            {% endif %}
+                    <!-- Right Side - Form -->
+                    <div class="col-lg-7">
+                        <div class="auth-body">
+                            <h3 class="mb-2">Crie sua conta</h3>
+                            <p class="text-muted mb-4">Preencha os dados abaixo para começar</p>
+                
+                            <form method="post" id="registerForm">
+                                {% csrf_token %}
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.first_name.id_for_label }}" class="form-label fw-bold">
+                                            <i class="bi bi-person me-2"></i>Nome *
+                                        </label>
+                                        {{ form.first_name }}
+                                        {% if form.first_name.errors %}
+                                            <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.last_name.id_for_label }}" class="form-label fw-bold">
+                                            <i class="bi bi-person me-2"></i>Sobrenome *
+                                        </label>
+                                        {{ form.last_name }}
+                                        {% if form.last_name.errors %}
+                                            <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.username.id_for_label }}" class="form-label fw-bold">
+                                        <i class="bi bi-at me-2"></i>Nome de usuário *
+                                    </label>
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                        <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+                                    {% endif %}
+                                    <div class="form-text">Usado para fazer login</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">
+                                        <i class="bi bi-envelope me-2"></i>Email *
+                                    </label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.password1.id_for_label }}" class="form-label fw-bold">
+                                            <i class="bi bi-lock me-2"></i>Senha *
+                                        </label>
+                                        {{ form.password1 }}
+                                        <div class="password-strength">
+                                            <div class="password-strength-bar" id="strengthBar"></div>
+                                        </div>
+                                        <small class="text-muted" id="strengthText"></small>
+                                        {% if form.password1.errors %}
+                                            <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.password2.id_for_label }}" class="form-label fw-bold">
+                                            <i class="bi bi-lock-fill me-2"></i>Confirmar Senha *
+                                        </label>
+                                        {{ form.password2 }}
+                                        {% if form.password2.errors %}
+                                            <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger rounded-3">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        {{ form.non_field_errors }}
+                                    </div>
+                                {% endif %}
+                                
+                                <button type="submit" class="btn btn-primary btn-auth w-100 mb-3">
+                                    <i class="bi bi-person-check me-2"></i> Criar Conta Grátis
+                                </button>
+                            </form>
                         </div>
                         
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.last_name.id_for_label }}" class="form-label">Sobrenome *</label>
-                            {{ form.last_name }}
-                            {% if form.last_name.errors %}
-                                <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
-                            {% endif %}
+                        <div class="auth-footer">
+                            <p class="mb-0">Já tem uma conta? 
+                                <a href="{% url 'accounts:login' %}" class="text-decoration-none fw-bold">Entrar agora</a>
+                            </p>
                         </div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label">Nome de usuário *</label>
-                        {{ form.username }}
-                        {% if form.username.errors %}
-                            <div class="text-danger small mt-1">{{ form.username.errors }}</div>
-                        {% endif %}
-                        <div class="form-text">Usado para fazer login</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">Email *</label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <div class="text-danger small mt-1">{{ form.email.errors }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.password1.id_for_label }}" class="form-label">Senha *</label>
-                            {{ form.password1 }}
-                            {% if form.password1.errors %}
-                                <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.password2.id_for_label }}" class="form-label">Confirmar Senha *</label>
-                            {{ form.password2 }}
-                            {% if form.password2.errors %}
-                                <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {{ form.non_field_errors }}
-                        </div>
-                    {% endif %}
-                    
-                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                        <i class="bi bi-person-check me-2"></i> Criar Conta Grátis
-                    </button>
-                </form>
-                
-                <hr class="my-4">
-                
-                <div class="text-center">
-                    <p class="mb-0">Já tem uma conta? 
-                        <a href="{% url 'accounts:login' %}" class="text-primary fw-bold">Entrar</a>
-                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+// Password strength indicator
+const password1 = document.getElementById('{{ form.password1.id_for_label }}');
+const strengthBar = document.getElementById('strengthBar');
+const strengthText = document.getElementById('strengthText');
+
+if (password1) {
+    password1.addEventListener('input', function() {
+        const val = this.value;
+        let strength = 0;
+        
+        if (val.length >= 8) strength++;
+        if (val.match(/[a-z]/) && val.match(/[A-Z]/)) strength++;
+        if (val.match(/[0-9]/)) strength++;
+        if (val.match(/[^a-zA-Z0-9]/)) strength++;
+        
+        strengthBar.className = 'password-strength-bar';
+        
+        if (strength === 0) {
+            strengthBar.style.width = '0';
+            strengthText.textContent = '';
+        } else if (strength <= 2) {
+            strengthBar.classList.add('strength-weak');
+            strengthText.textContent = 'Senha fraca';
+            strengthText.style.color = '#ff4444';
+        } else if (strength === 3) {
+            strengthBar.classList.add('strength-medium');
+            strengthText.textContent = 'Senha média';
+            strengthText.style.color = '#ffa500';
+        } else {
+            strengthBar.classList.add('strength-strong');
+            strengthText.textContent = 'Senha forte';
+            strengthText.style.color = '#00C851';
+        }
+    });
+}
+</script>
 {% endblock %}
