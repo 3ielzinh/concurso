@@ -8,7 +8,13 @@ class Plan(models.Model):
     """
     PLAN_TYPES = [
         ('free', 'Gratuito'),
-        ('pro', 'Pro'),
+        ('police', 'Carreira Policial'),
+        ('bank', 'Carreira Bancária'),
+        ('enem', 'ENEM/Vestibular'),
+        ('military', 'Carreira Militar'),
+        ('legal', 'Carreira Jurídica'),
+        ('fiscal', 'Carreira Fiscal'),
+        ('pro', 'Pro - Acesso Total'),
     ]
     
     name = models.CharField('Nome', max_length=100)
@@ -16,6 +22,15 @@ class Plan(models.Model):
     description = models.TextField('Descrição')
     price = models.DecimalField('Preço Mensal', max_digits=8, decimal_places=2)
     features = models.TextField('Recursos', help_text='Um recurso por linha')
+    
+    # Module access
+    modules = models.ManyToManyField(
+        'modules.Module',
+        related_name='plans',
+        verbose_name='Módulos Inclusos',
+        blank=True,
+        help_text='Módulos que este plano permite acessar'
+    )
     
     # Access control
     max_categories = models.IntegerField('Máximo de Categorias', default=3)
