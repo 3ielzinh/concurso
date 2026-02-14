@@ -22,10 +22,8 @@
     animation: slideUp 0.5s ease;
 }
 
-@media (prefers-color-scheme: dark) {
-    .auth-card {
-        background: #1a1a1a;
-    }
+body.dark-mode .auth-card {
+    background: #1a1a1a;
 }
 
 @keyframes slideUp {
@@ -65,27 +63,25 @@
     padding: 40px 30px;
 }
 
-@media (prefers-color-scheme: dark) {
-    .auth-body {
-        background: #1a1a1a;
-        color: #e0e0e0;
-    }
-    
-    .auth-body h3 {
-        color: #fff;
-    }
-    
-    .auth-body .text-muted {
-        color: #aaa !important;
-    }
-    
-    .auth-body .form-label {
-        color: #e0e0e0;
-    }
-    
-    .auth-body .form-text {
-        color: #888 !important;
-    }
+body.dark-mode .auth-body {
+    background: #1a1a1a;
+    color: #e0e0e0;
+}
+
+body.dark-mode .auth-body h3 {
+    color: #fff;
+}
+
+body.dark-mode .auth-body .text-muted {
+    color: #aaa !important;
+}
+
+body.dark-mode .auth-body .form-label {
+    color: #e0e0e0;
+}
+
+body.dark-mode .auth-body .form-text {
+    color: #888 !important;
 }
 
 .form-control {
@@ -100,21 +96,19 @@
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
-@media (prefers-color-scheme: dark) {
-    .form-control {
-        background: #2a2a2a;
-        border-color: #404040;
-        color: #e0e0e0;
-    }
-    
-    .form-control::placeholder {
-        color: #888;
-    }
-    
-    .form-control:focus {
-        background: #2a2a2a;
-        border-color: #667eea;
-    }
+body.dark-mode .form-control {
+    background: #2a2a2a;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .form-control::placeholder {
+    color: #888;
+}
+
+body.dark-mode .form-control:focus {
+    background: #2a2a2a;
+    border-color: #667eea;
 }
 
 .btn-auth {
@@ -156,16 +150,50 @@
     border-top: 1px solid #e0e0e0;
 }
 
-@media (prefers-color-scheme: dark) {
-    .auth-footer {
-        background: #0d0d0d;
-        border-top-color: #333;
-        color: #e0e0e0;
-    }
-    
-    .auth-footer a {
-        color: #8b9bea !important;
-    }
+body.dark-mode .auth-footer {
+    background: #0d0d0d;
+    border-top-color: #333;
+    color: #e0e0e0;
+}
+
+body.dark-mode .auth-footer a {
+    color: #8b9bea !important;
+}
+
+.theme-toggle-floating {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+
+.theme-toggle-floating:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle-floating i {
+    font-size: 1.2rem;
+    color: #667eea;
+}
+
+body.dark-mode .theme-toggle-floating {
+    background: rgba(42, 42, 42, 0.9);
+}
+
+body.dark-mode .theme-toggle-floating i {
+    color: #ffd700;
 }
 
 .benefits-badge {
@@ -180,6 +208,11 @@
 {% endblock %}
 
 {% block content %}
+<!-- Theme Toggle Button -->
+<button class="theme-toggle-floating" id="themeToggleFloating" title="Alternar tema">
+    <i class="bi bi-moon-stars-fill" id="themeIconFloating"></i>
+</button>
+
 <div class="auth-container">
     <div class="container">
         <div class="row justify-content-center">
@@ -337,5 +370,33 @@ if (password1) {
         }
     });
 }
+
+// Theme toggle functionality
+const themeToggleFloating = document.getElementById('themeToggleFloating');
+const themeIconFloating = document.getElementById('themeIconFloating');
+
+function updateThemeIcon(isDark) {
+    const iconClass = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+    if (themeIconFloating) {
+        themeIconFloating.className = iconClass;
+    }
+}
+
+function toggleTheme() {
+    const isDarkMode = document.body.classList.toggle('dark-mode');
+    const theme = isDarkMode ? 'dark' : 'light';
+    localStorage.setItem('theme', theme);
+    updateThemeIcon(isDarkMode);
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'light';
+if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+}
+updateThemeIcon(savedTheme === 'dark');
+
+// Add event listener
+themeToggleFloating?.addEventListener('click', toggleTheme);
 </script>
 {% endblock %}
