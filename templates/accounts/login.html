@@ -22,6 +22,12 @@
     animation: slideUp 0.5s ease;
 }
 
+@media (prefers-color-scheme: dark) {
+    .auth-card {
+        background: #1a1a1a;
+    }
+}
+
 @keyframes slideUp {
     from {
         opacity: 0;
@@ -59,6 +65,13 @@
     padding: 40px 30px;
 }
 
+@media (prefers-color-scheme: dark) {
+    .auth-body {
+        background: #1a1a1a;
+        color: #e0e0e0;
+    }
+}
+
 .form-control {
     border-radius: 10px;
     border: 2px solid #e0e0e0;
@@ -69,6 +82,23 @@
 .form-control:focus {
     border-color: #667eea;
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+    .form-control {
+        background: #2a2a2a;
+        border-color: #404040;
+        color: #e0e0e0;
+    }
+    
+    .form-control::placeholder {
+        color: #888;
+    }
+    
+    .form-control:focus {
+        background: #2a2a2a;
+        border-color: #667eea;
+    }
 }
 
 .btn-auth {
@@ -110,6 +140,18 @@
     padding: 20px;
     text-align: center;
     border-top: 1px solid #e0e0e0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .auth-footer {
+        background: #0d0d0d;
+        border-top-color: #333;
+        color: #e0e0e0;
+    }
+    
+    .auth-footer a {
+        color: #8b9bea !important;
+    }
 }
 
 .features-list {
