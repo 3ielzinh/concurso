@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciar Acesso - {{ user_obj.username }}{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-grid me-2"></i> Gerenciar Acesso aos Módulos
+    </h1>
+    <div>
+        <a href="{% url 'user_management:user_detail' user_obj.id %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person-check me-2"></i> Acesso de: {{ user_obj.get_full_name|default:user_obj.username }}
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <label class="form-label fw-bold mb-0">Categorias Permitidas</label>
+                            </div>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary" id="selectAllCategories">
+                                    <i class="bi bi-check-all"></i> Selecionar Todos
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="deselectAllCategories">
+                                    <i class="bi bi-x"></i> Limpar
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-muted small">
+                            Selecione as categorias que o usuário poderá acessar. Se nenhuma for selecionada, 
+                            o usuário terá acesso baseado no plano de assinatura.
+                        </p>
+                        
+                        <div class="row">
+                            {% for category in all_categories %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            <input type="checkbox" 
+                                                   name="allowed_categories" 
+                                                   value="{{ category.id }}" 
+                                                   class="form-check-input"
+                                                   id="category_{{ category.id }}"
+                                                   {% if category in form.instance.allowed_categories.all %}checked{% endif %}>
+                                            <label class="form-check-label" for="category_{{ category.id }}">
+                                                <i class="bi bi-{{ category.icon }} text-{{ category.color }} me-2"></i>
+                                                <strong>{{ category.get_name_display }}</strong>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.custom_access_level.id_for_label }}" class="form-label">
+                            Nível de Acesso Customizado
+                        </label>
+                        {{ form.custom_access_level }}
+                        <small class="form-text text-muted">
+                            Ex: "VIP", "Teste", "Acesso Especial", etc.
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">Observações</label>
+                        {{ form.notes }}
+                        <small class="form-text text-muted">
+                            Anotações internas sobre as permissões deste usuário.
+                        </small>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'user_management:user_detail' user_obj.id %}" class="btn btn-secondary">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Salvar Configurações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-info-circle me-2"></i> Como Funciona
+            </div>
+            <div class="card-body">
+                <h6>Prioridade de Acesso:</h6>
+                <ol class="small">
+                    <li><strong>Categorias Permitidas:</strong> Se categorias específicas forem selecionadas, o usuário terá acesso apenas a elas.</li>
+                    <li><strong>Plano de Assinatura:</strong> Se nenhuma categoria for selecionada, o acesso será baseado no plano (Free/Premium).</li>
+                    <li><strong>Acesso Customizado:</strong> Use o campo de nível customizado para marcar acessos especiais.</li>
+                </ol>
+                
+                <hr>
+                
+                <p class="small text-muted mb-0">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    As alterações são aplicadas imediatamente. O usuário precisará recarregar a página para ver as mudanças.
+                </p>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <i class="bi bi-star me-2"></i> Status Atual
+            </div>
+            <div class="card-body">
+                <p><strong>Plano:</strong><br>
+                {% if user_obj.is_premium %}
+                    <span class="badge badge-premium">Premium</span>
+                {% else %}
+                    <span class="badge bg-secondary">Gratuito</span>
+                {% endif %}
+                </p>
+                
+                <p><strong>Status:</strong><br>
+                {% if user_obj.is_active %}
+                    <span class="badge bg-success">Ativo</span>
+                {% else %}
+                    <span class="badge bg-danger">Inativo</span>
+                {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAllBtn = document.getElementById('selectAllCategories');
+        const deselectAllBtn = document.getElementById('deselectAllCategories');
+        const categoryCheckboxes = document.querySelectorAll('input[name="allowed_categories"]');
+        
+        selectAllBtn.addEventListener('click', function() {
+            categoryCheckboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        });
+        
+        deselectAllBtn.addEventListener('click', function() {
+            categoryCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        });
+    });
+</script>
+{% endblock %}

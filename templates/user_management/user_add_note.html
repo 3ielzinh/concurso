@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Adicionar Nota - {{ user_obj.username }}{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-journal-plus me-2"></i> Adicionar Nota Administrativa
+    </h1>
+    <div>
+        <a href="{% url 'user_management:user_detail' user_obj.id %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person me-2"></i> Nota sobre: {{ user_obj.get_full_name|default:user_obj.username }}
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.note.id_for_label }}" class="form-label">Nota</label>
+                        {{ form.note }}
+                        {% if form.note.errors %}
+                            <div class="text-danger">{{ form.note.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_important }}
+                            <label class="form-check-label" for="{{ form.is_important.id_for_label }}">
+                                Marcar como importante
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'user_management:user_detail' user_obj.id %}" class="btn btn-secondary">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Adicionar Nota
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-info-circle me-2"></i> Sobre Notas
+            </div>
+            <div class="card-body">
+                <p class="small">
+                    As notas administrativas são visíveis apenas para administradores e servem para 
+                    documentar interações, problemas, acordos especiais ou qualquer informação relevante 
+                    sobre o usuário.
+                </p>
+                
+                <p class="small mb-0">
+                    <strong>Dica:</strong> Marque notas importantes para destacá-las na visualização.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciamento de Usuários{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-people me-2"></i> Gerenciamento de Usuários
+    </h1>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card stat-card primary">
+            <div class="card-body">
+                <div class="stat-label">Total de Usuários</div>
+                <div class="stat-value">{{ stats.total_users }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card stat-card success">
+            <div class="card-body">
+                <div class="stat-label">Usuários Ativos</div>
+                <div class="stat-value">{{ stats.active_users }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card stat-card warning">
+            <div class="card-body">
+                <div class="stat-label">Usuários Premium</div>
+                <div class="stat-value">{{ stats.premium_users }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card stat-card info">
+            <div class="card-body">
+                <div class="stat-label">Novos Este Mês</div>
+                <div class="stat-value">{{ stats.new_this_month }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter Form -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-funnel me-2"></i> Filtros e Busca
+    </div>
+    <div class="card-body">
+        <form method="get" action="{% url 'user_management:user_list' %}">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.search.label_tag }}
+                    {{ form.search }}
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    {{ form.is_active.label_tag }}
+                    {{ form.is_active }}
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    {{ form.is_premium.label_tag }}
+                    {{ form.is_premium }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-5 mb-3">
+                    <label for="id_date_from">Data de Cadastro (De)</label>
+                    {{ form.date_from }}
+                </div>
+                
+                <div class="col-md-5 mb-3">
+                    <label for="id_date_to">Data de Cadastro (Até)</label>
+                    {{ form.date_to }}
+                </div>
+                
+                <div class="col-md-2 mb-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-list me-2"></i> Lista de Usuários ({{ page_obj.paginator.count }})
+    </div>
+    <div class="card-body">
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Plano</th>
+                        <th>Cadastro</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in page_obj %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="ms-2">
+                                    <div class="fw-bold">{{ user.get_full_name|default:user.username }}</div>
+                                    <small class="text-muted">@{{ user.username }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.is_active %}
+                                <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inativo</span>
+                            {% endif %}
+                            
+                            {% if user.is_staff %}
+                                <span class="badge bg-primary">Staff</span>
+                            {% endif %}
+                            
+                            {% if user.is_superuser %}
+                                <span class="badge bg-dark">Admin</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.is_premium %}
+                                <span class="badge badge-premium">
+                                    <i class="bi bi-star-fill"></i> Premium
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">Gratuito</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>{{ user.created_at|date:"d/m/Y" }}</small>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'user_management:user_detail' user.id %}" 
+                                   class="btn btn-sm btn-outline-primary" 
+                                   title="Ver Detalhes">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'user_management:user_edit' user.id %}" 
+                                   class="btn btn-sm btn-outline-warning" 
+                                   title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% if user != request.user and not user.is_superuser %}
+                                <a href="{% url 'user_management:user_delete' user.id %}" 
+                                   class="btn btn-sm btn-outline-danger" 
+                                   title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                </li>
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <p class="text-muted text-center mb-0">Nenhum usuário encontrado.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

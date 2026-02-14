@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Cronograma de Estudos{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-calendar3 me-2"></i> Meu Cronograma
+    </h1>
+    <a href="{% url 'modules:schedule_add' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i> Adicionar Horário
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if schedules %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Dia da Semana</th>
+                        <th>Horário</th>
+                        <th>Disciplina</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for schedule in schedules %}
+                    <tr>
+                        <td>{{ schedule.get_weekday_display }}</td>
+                        <td>{{ schedule.start_time|time:"H:i" }} - {{ schedule.end_time|time:"H:i" }}</td>
+                        <td>{{ schedule.subject.name }}</td>
+                        <td>
+                            {% if schedule.is_active %}
+                            <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'modules:schedule_edit' schedule.pk %}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'modules:schedule_delete' schedule.pk %}" 
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-calendar-x text-muted" style="font-size: 4rem;"></i>
+            <p class="text-muted mt-3 mb-0">Nenhum cronograma configurado ainda.</p>
+            <a href="{% url 'modules:schedule_add' %}" class="btn btn-primary mt-3">
+                <i class="bi bi-plus-circle me-2"></i> Criar Meu Cronograma
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body.dark-mode .text-gray-800 {
+        color: #e6edf3 !important;
+    }
+    
+    body.dark-mode .text-muted {
+        color: #8b949e !important;
+    }
+    
+    body.dark-mode .card-body p {
+        color: #e6edf3 !important;
+    }
+</style>
+{% endblock %}

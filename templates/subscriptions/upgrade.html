@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Upgrade - {{ plan.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-rocket-takeoff me-2"></i>
+                    Upgrade para {{ plan.name }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <div class="display-4 mb-3">
+                        <strong>R$ {{ plan.price|floatformat:2 }}</strong>
+                        <small class="fs-6 text-muted">/mês</small>
+                    </div>
+                    <p class="text-muted">{{ plan.description }}</p>
+                </div>
+                
+                <hr>
+                
+                <h5 class="mb-3">O que está incluído:</h5>
+                <ul class="list-unstyled mb-4">
+                    {% for feature in plan.get_features_list %}
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        {{ feature }}
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Funcionalidade em Desenvolvimento</strong>
+                    <p class="mb-0 mt-2">
+                        A integração com gateway de pagamento está em desenvolvimento. 
+                        Em breve você poderá fazer upgrade diretamente na plataforma!
+                    </p>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'subscriptions:plans' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i> Voltar
+                        </a>
+                        <button type="submit" class="btn btn-warning" disabled>
+                            <i class="bi bi-lock-fill me-2"></i> Checkout (Em Breve)
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <small class="text-muted">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Pagamento 100% seguro
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

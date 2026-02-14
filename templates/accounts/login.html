@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Entrar - MicroSaaS Concursos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="col-xl-5 col-lg-6 col-md-8">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="bi bi-trophy-fill text-primary" style="font-size: 3rem;"></i>
+                    <h1 class="h3 text-gray-900 mt-3">Bem-vindo de volta!</h1>
+                    <p class="text-muted">Entre na sua conta para continuar estudando</p>
+                </div>
+                
+                <form method="post" class="user">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">Usuário</label>
+                        <input type="text" name="username" class="form-control form-control-lg" 
+                               id="{{ form.username.id_for_label }}" 
+                               placeholder="Digite seu usuário" required autofocus>
+                        {% if form.username.errors %}
+                            <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.password.id_for_label }}" class="form-label">Senha</label>
+                        <input type="password" name="password" class="form-control form-control-lg" 
+                               id="{{ form.password.id_for_label }}" 
+                               placeholder="Digite sua senha" required>
+                        {% if form.password.errors %}
+                            <div class="text-danger small mt-1">{{ form.password.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="remember" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">
+                            Lembrar de mim
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Entrar
+                    </button>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-0">Não tem uma conta? 
+                        <a href="{% url 'accounts:register' %}" class="text-primary fw-bold">Criar conta grátis</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'subscriptions:plans' %}" class="text-muted">
+                <i class="bi bi-info-circle me-1"></i> Ver planos disponíveis
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

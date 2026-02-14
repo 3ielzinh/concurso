@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Minha Assinatura{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-star me-2"></i> Minha Assinatura
+    </h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        {% if subscription and subscription.is_active %}
+        <div class="card mb-4">
+            <div class="card-header {% if subscription.plan.plan_type == 'pro' %}bg-warning text-white{% else %}bg-secondary text-white{% endif %}">
+                <h4 class="mb-0">
+                    <i class="bi bi-{% if subscription.plan.plan_type == 'pro' %}star-fill{% else %}info-circle{% endif %} me-2"></i>
+                    Plano {{ subscription.plan.name }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <p class="mb-2">
+                            <strong><i class="bi bi-calendar-check me-2 text-success"></i> Status:</strong><br>
+                            <span class="badge bg-success">{{ subscription.get_status_display }}</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="mb-2">
+                            <strong><i class="bi bi-calendar-event me-2 text-primary"></i> Início:</strong><br>
+                            {{ subscription.start_date|date:"d/m/Y" }}
+                        </p>
+                    </div>
+                </div>
+                
+                {% if subscription.end_date %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <p class="mb-2">
+                            <strong><i class="bi bi-calendar-x me-2 text-danger"></i> Válido até:</strong><br>
+                            {{ subscription.end_date|date:"d/m/Y" }}
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="mb-2">
+                            <strong><i class="bi bi-arrow-repeat me-2 text-info"></i> Renovação Automática:</strong><br>
+                            {% if subscription.auto_renew %}
+                            <span class="badge bg-success">Ativada</span>
+                            {% else %}
+                            <span class="badge bg-warning">Desativada</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <hr>
+                
+                <h5 class="mb-3">Recursos do seu plano:</h5>
+                <ul class="list-unstyled">
+                    {% for feature in subscription.plan.get_features_list %}
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        {{ feature }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Plano Gratuito</strong>
+            <p class="mb-0 mt-2">Você está utilizando o plano gratuito. Faça upgrade para desbloquear recursos premium!</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-rocket-takeoff me-2"></i> Planos Disponíveis
+            </div>
+            <div class="card-body">
+                {% for plan in all_plans %}
+                <div class="mb-3 p-3 border rounded {% if subscription and subscription.plan.pk == plan.pk %}bg-light{% endif %}">
+                    <h6 class="mb-2">{{ plan.name }}</h6>
+                    <p class="h5 mb-2">
+                        {% if plan.price == 0 %}
+                        Grátis
+                        {% else %}
+                        R$ {{ plan.price|floatformat:2 }}/mês
+                        {% endif %}
+                    </p>
+                    
+                    {% if subscription and subscription.plan.pk == plan.pk %}
+                    <button class="btn btn-secondary btn-sm w-100" disabled>
+                        <i class="bi bi-check-circle me-1"></i> Plano Atual
+                    </button>
+                    {% elif plan.plan_type != 'free' %}
+                    <a href="{% url 'subscriptions:upgrade' plan.plan_type %}" 
+                       class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-arrow-up-circle me-1"></i> Fazer Upgrade
+                    </a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'subscriptions:plans' %}" class="btn btn-outline-primary btn-sm">
+                        Ver Todos os Planos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

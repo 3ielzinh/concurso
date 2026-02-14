@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Usuário - {{ user_obj.username }}{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-trash me-2"></i> Excluir Usuário
+    </h1>
+    <div>
+        <a href="{% url 'user_management:user_detail' user_obj.id %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-exclamation-triangle me-2"></i> CONFIRMAR EXCLUSÃO
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <h5 class="alert-heading">
+                        <i class="bi bi-exclamation-octagon me-2"></i> Ação Irreversível!
+                    </h5>
+                    <p>
+                        Você está prestes a excluir permanentemente o usuário <strong>{{ user_obj.get_full_name|default:user_obj.username }}</strong>.
+                    </p>
+                    <hr>
+                    <p class="mb-0">
+                        Esta ação não pode ser desfeita. Todos os dados associados a este usuário serão removidos, incluindo:
+                    </p>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <h6><i class="bi bi-person-badge me-2 text-primary"></i> Informações da Conta</h6>
+                                <p class="mb-0 small">
+                                    <strong>Username:</strong> @{{ user_obj.username }}<br>
+                                    <strong>Email:</strong> {{ user_obj.email }}<br>
+                                    <strong>Nome:</strong> {{ user_obj.get_full_name|default:"N/A" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <h6><i class="bi bi-star me-2 text-warning"></i> Assinatura</h6>
+                                <p class="mb-0 small">
+                                    <strong>Plano:</strong> 
+                                    {% if user_obj.is_premium %}Premium{% else %}Gratuito{% endif %}<br>
+                                    <strong>Status:</strong>
+                                    {% if user_obj.is_active %}Ativo{% else %}Inativo{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <h6 class="text-danger"><i class="bi bi-x-circle me-2"></i> Dados que serão excluídos:</h6>
+                        <ul class="small mb-0">
+                            <li>Todas as sessões de estudo</li>
+                            <li>Histórico de progresso</li>
+                            <li>Notas e anotações</li>
+                            <li>Configurações de acesso a módulos</li>
+                            <li>Logs de atividade</li>
+                            <li>Histórico de assinaturas</li>
+                            <li>Notas administrativas</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'user_management:user_detail' user_obj.id %}" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-x"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita!');">
+                            <i class="bi bi-trash"></i> Sim, Excluir Permanentemente
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user_obj.username }} - Detalhes{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">
+        <i class="bi bi-person me-2"></i> {{ user_obj.get_full_name|default:user_obj.username }}
+    </h1>
+    <div>
+        <a href="{% url 'user_management:user_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<!-- User Info Cards -->
+<div class="row mb-4">
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-person-badge me-2"></i> Informações Básicas
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Username:</strong><br>
+                    <span class="text-muted">@{{ user_obj.username }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Email:</strong><br>
+                    <span class="text-muted">{{ user_obj.email }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Nome Completo:</strong><br>
+                    <span class="text-muted">{{ user_obj.get_full_name|default:"Não informado" }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Telefone:</strong><br>
+                    <span class="text-muted">{{ user_obj.phone|default:"Não informado" }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Status:</strong><br>
+                    {% if user_obj.is_active %}
+                        <span class="badge bg-success">Ativo</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inativo</span>
+                    {% endif %}
+                    
+                    {% if user_obj.is_staff %}
+                        <span class="badge bg-primary">Staff</span>
+                    {% endif %}
+                    
+                    {% if user_obj.is_superuser %}
+                        <span class="badge bg-dark">Admin</span>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <strong>Cadastrado em:</strong><br>
+                    <span class="text-muted">{{ user_obj.created_at|date:"d/m/Y H:i" }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Última atualização:</strong><br>
+                    <span class="text-muted">{{ user_obj.updated_at|date:"d/m/Y H:i" }}</span>
+                </div>
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'user_management:user_edit' user_obj.id %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar Informações
+                    </a>
+                    <a href="{% url 'user_management:user_reset_password' user_obj.id %}" class="btn btn-info">
+                        <i class="bi bi-key"></i> Redefinir Senha
+                    </a>
+                    <form method="post" action="{% url 'user_management:user_toggle_status' user_obj.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary w-100">
+                            <i class="bi bi-toggle-{% if user_obj.is_active %}off{% else %}on{% endif %}"></i>
+                            {% if user_obj.is_active %}Desativar{% else %}Ativar{% endif %} Conta
+                        </button>
+                    </form>
+                    {% if user_obj != request.user and not user_obj.is_superuser %}
+                    <a href="{% url 'user_management:user_delete' user_obj.id %}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Excluir Usuário
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <!-- Subscription Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-star me-2"></i> Informações de Assinatura
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <strong>Plano Atual:</strong><br>
+                        {% if user_obj.is_premium %}
+                            <span class="badge badge-premium fs-6">
+                                <i class="bi bi-star-fill"></i> Premium
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary fs-6">Gratuito</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>Status da Assinatura:</strong><br>
+                        {% if user_obj.has_active_subscription %}
+                            <span class="badge bg-success">Ativa</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Sem assinatura</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>Início:</strong><br>
+                        <span class="text-muted">{{ user_obj.subscription_start|date:"d/m/Y"|default:"N/A" }}</span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>Término:</strong><br>
+                        <span class="text-muted">{{ user_obj.subscription_end|date:"d/m/Y"|default:"Sem data" }}</span>
+                    </div>
+                </div>
+                
+                {% if subscriptions %}
+                <hr>
+                <h6>Histórico de Assinaturas</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Plano</th>
+                                <th>Status</th>
+                                <th>Início</th>
+                                <th>Fim</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sub in subscriptions %}
+                            <tr>
+                                <td>{{ sub.plan.name }}</td>
+                                <td>
+                                    <span class="badge bg-{% if sub.status == 'active' %}success{% elif sub.status == 'cancelled' %}warning{% else %}secondary{% endif %}">
+                                        {{ sub.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ sub.start_date|date:"d/m/Y" }}</td>
+                                <td>{{ sub.end_date|date:"d/m/Y"|default:"Sem data" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Study Statistics -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-graph-up me-2"></i> Estatísticas de Estudo
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h3 class="text-primary">{{ total_study_hours|floatformat:1 }}h</h3>
+                        <p class="text-muted">Horas Totais</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="text-success">{{ study_sessions_count }}</h3>
+                        <p class="text-muted">Sessões de Estudo</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="text-info">{{ user_obj.study_goal_hours }}h</h3>
+                        <p class="text-muted">Meta Mensal</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Module Access -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-grid me-2"></i> Acesso a Módulos</span>
+                <a href="{% url 'user_management:user_module_access' user_obj.id %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-gear"></i> Gerenciar
+                </a>
+            </div>
+            <div class="card-body">
+                {% if module_access.allowed_categories.exists %}
+                    <div class="row">
+                        {% for category in module_access.allowed_categories.all %}
+                        <div class="col-md-6 mb-2">
+                            <span class="badge bg-{{ category.color }} me-1">
+                                <i class="bi bi-{{ category.icon }}"></i>
+                                {{ category.get_name_display }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Nenhuma categoria específica atribuída. Usando permissões padrão do plano.</p>
+                {% endif %}
+                
+                {% if module_access.custom_access_level %}
+                <hr>
+                <p class="mb-0"><strong>Nível de Acesso:</strong> {{ module_access.custom_access_level }}</p>
+                {% endif %}
+                
+                {% if module_access.notes %}
+                <hr>
+                <p class="mb-0"><strong>Observações:</strong><br>{{ module_access.notes }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Admin Notes -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-journal-text me-2"></i> Notas Administrativas</span>
+                <a href="{% url 'user_management:user_add_note' user_obj.id %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i> Nova Nota
+                </a>
+            </div>
+            <div class="card-body">
+                {% if admin_notes %}
+                    {% for note in admin_notes %}
+                    <div class="card mb-2 {% if note.is_important %}border-warning{% endif %}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    {% if note.is_important %}
+                                        <span class="badge bg-warning text-dark">Importante</span>
+                                    {% endif %}
+                                    <small class="text-muted">
+                                        Por {{ note.admin.username }} em {{ note.created_at|date:"d/m/Y H:i" }}
+                                    </small>
+                                </div>
+                                <form method="post" action="{% url 'user_management:user_delete_note' note.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir nota?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <p class="mb-0 mt-2">{{ note.note }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">Nenhuma nota administrativa.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Access Logs -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-clock-history me-2"></i> Logs de Atividade (Últimos 20)
+            </div>
+            <div class="card-body">
+                {% if access_logs %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Ação</th>
+                                <th>IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in access_logs %}
+                            <tr>
+                                <td><small>{{ log.timestamp|date:"d/m/Y H:i:s" }}</small></td>
+                                <td>{{ log.action }}</td>
+                                <td><small>{{ log.ip_address|default:"N/A" }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Nenhum log de atividade registrado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
